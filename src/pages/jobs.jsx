@@ -6,7 +6,6 @@ import React from 'react'
 const jobs = () => {
   return (
       <>
-          <Navbar />
           <JobPage/>
     </>
   )

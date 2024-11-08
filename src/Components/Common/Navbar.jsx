@@ -1,9 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiMenu, FiX } from "react-icons/fi";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isLoaded } = useUser();
+
+  // Log user and isLoaded status for debugging
+  useEffect(() => {
+    console.log("User:", user);
+    console.log("isLoaded:", isLoaded);
+  }, [user, isLoaded]);
 
   // Menu items array
   const menuItems = [
@@ -12,11 +26,6 @@ const Navbar = () => {
     { label: "About Us", href: "/about" },
     { label: "Contact Us", href: "/contact" },
     { label: "Blog", href: "/blog" },
-  ];
-
-  const authItems = [
-    { label: "Post a Job", href: "/post", type: "outline" },
-    { label: "Sign Up", href: "/signup", type: "button" },
   ];
 
   return (
@@ -45,25 +54,38 @@ const Navbar = () => {
 
           {/* Auth Links for Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            {authItems.map((item, index) =>
-              item.type === "button" ? (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className="bg-[#007ef0] font-semibold text-white px-4 py-1 rounded-full hover:bg-[#005bbd] transition-colors duration-200"
-                >
-                  {item.label}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="bg-[#007ef0] font-semibold text-white px-4 py-1 rounded-full hover:bg-[#005bbd] transition-colors duration-200">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <div className="flex items-center space-x-4">
+                {/* Posted Jobs link */}
+                <Link href="/posted-jobs">
+                  <span className="text-gray-700 font-medium hover:text-[#007ef0] transition-colors duration-200">
+                    Posted Jobs
+                  </span>
                 </Link>
-              ) : (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className="border border-[#007ef0] text-[#007ef0] font-semibold px-4 py-1 rounded-full hover:bg-[#007ef0] hover:text-white transition-colors duration-200"
-                >
-                  {item.label}
+                {/* Post a Job button */}
+                <Link href="/post-job">
+                  <button className="bg-blue-500 font-semibold text-white px-4 py-1 rounded-full hover:bg-blue-600 transition-colors duration-200">
+                    Post a Job
+                  </button>
                 </Link>
-              )
-            )}
+                {/* User Avatar and Name */}
+                <div className="flex items-center space-x-2">
+                  <UserButton />
+                  {isLoaded && user && (
+                    <span className="text-gray-700 font-medium">
+                      {user.firstName || user.fullName || "User"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </SignedIn>
           </div>
 
           {/* Mobile Menu Button */}
@@ -95,19 +117,38 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
-            {authItems.map((item, index) => (
-              <Link
-                key={index}
-                href={item.href}
-                className={`block ${
-                  item.type === "button"
-                    ? "bg-[#007ef0] text-white hover:bg-[#005bbd]"
-                    : "border border-[#007ef0] text-[#007ef0] hover:bg-[#007ef0] hover:text-white"
-                } px-3 py-2 rounded-md font-semibold transition-colors duration-200`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="w-full bg-[#007ef0] text-white font-semibold px-3 py-2 rounded-md hover:bg-[#005bbd] transition-colors duration-200">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+            <SignedIn>
+              <div className="flex flex-col space-y-2">
+                {/* Posted Jobs link for mobile */}
+                <Link href="/posted-jobs">
+                  <span className="w-full text-gray-700 text-center font-medium hover:text-[#007ef0] transition-colors duration-200">
+                    Posted Jobs
+                  </span>
+                </Link>
+                {/* Post a Job button for mobile */}
+                <Link href="/post-job">
+                  <button className="w-full bg-blue-500 text-white font-semibold px-3 py-2 rounded-md hover:bg-blue-600 transition-colors duration-200">
+                    Post a Job
+                  </button>
+                </Link>
+                {/* User Avatar and Name */}
+                <div className="flex items-center justify-center space-x-2">
+                  <UserButton />
+                  {isLoaded && user && (
+                    <span className="text-gray-700 font-medium">
+                      {user.firstName || user.fullName || "User"}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </SignedIn>
           </div>
         </div>
       )}

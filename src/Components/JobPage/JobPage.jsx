@@ -22,7 +22,12 @@ const JobPage = () => {
   useEffect(() => {
     axios
       .get("https://672d0153fd89797156411066.mockapi.io/jobs")
-      .then((response) => setJobs(response.data))
+      .then((response) => {
+        setJobs(response.data);
+        if (response.data.length > 0) {
+          setSelectedJob(response.data[0]); // Set the first job as default
+        }
+      })
       .catch((error) => console.error("Error fetching jobs:", error));
   }, []);
 
@@ -50,7 +55,7 @@ const JobPage = () => {
           <div
             key={job.id}
             onClick={() => handleJobClick(job)}
-            className={`p-4 cursor-pointer hover:bg-blue-50 flex items-start ${
+            className={`p-4 cursor-pointer flex items-start ${
               selectedJob?.id === job.id ? "bg-blue-100" : ""
             }`}
           >
@@ -85,7 +90,9 @@ const JobPage = () => {
       {/* Right Column: Job Details */}
       <div
         className={`flex-1 overflow-y-auto ${
-          showOverlay ? "fixed inset-0 bg-white z-50 p-6 md:static md:bg-transparent md:shadow-none" : ""
+          showOverlay
+            ? "fixed inset-0 bg-white z-50 p-6 md:static md:bg-transparent md:shadow-none"
+            : ""
         }`}
       >
         {showOverlay && (
@@ -140,13 +147,17 @@ const JobPage = () => {
             <div className="mt-4 flex items-center text-gray-600 text-sm">
               <FaClock className="mr-2" />
               Applicant review time is typically 1-2 weeks{" "}
-              <a href="#" className="text-blue-500 ml-1">Learn more</a>
+              <a href="#" className="text-blue-500 ml-1">
+                Learn more
+              </a>
             </div>
 
             <div className="mt-4 flex items-center text-gray-600 text-sm">
               <FaInfoCircle className="mr-2" />
               See how you compare to over 100 other applicants.{" "}
-              <a href="#" className="text-blue-500 ml-1">Reactivate Premium</a>
+              <a href="#" className="text-blue-500 ml-1">
+                Reactivate Premium
+              </a>
             </div>
 
             <div className="mt-6 flex space-x-2">
