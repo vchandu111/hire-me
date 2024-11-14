@@ -15,7 +15,9 @@ const Navbar = () => {
 
   // Log user and isLoaded status for debugging
   useEffect(() => {
-    console.log("User:", user);
+    console.log("User:", user?.id);
+    localStorage.setItem("userId", user?.id);
+
     console.log("isLoaded:", isLoaded);
   }, [user, isLoaded]);
 
@@ -64,7 +66,7 @@ const Navbar = () => {
             <SignedIn>
               <div className="flex items-center space-x-4">
                 {/* Posted Jobs link */}
-                <Link href="/posted-jobs">
+                <Link href="/jobs-posted">
                   <span className="text-gray-700 font-medium hover:text-[#007ef0] transition-colors duration-200">
                     Posted Jobs
                   </span>

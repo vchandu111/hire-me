@@ -17,11 +17,7 @@ export default function JobPosting() {
 
   // Function to handle Next button click
   const handleNext = () => {
-    if (jobTitle.trim()) {
-      router.push(`/JobDetailsForm?title=${encodeURIComponent(jobTitle)}`);
-    } else {
-      alert("Please enter the job title.");
-    }
+    router.push(`/MultipStepForm`);
   };
 
   // Function to toggle FAQ
@@ -42,30 +38,16 @@ export default function JobPosting() {
         <p className="text-lg text-center text-gray-600 mb-8">
           Reach thousands of qualified candidates quickly and easily.
         </p>
-        <div className="w-full max-w-md mb-6">
-          <label
-            className="block text-gray-700 text-lg font-medium mb-2"
-            htmlFor="job-title"
-          >
-            Job Title
-          </label>
-          <input
-            type="text"
-            id="job-title"
-            placeholder="e.g., Software Engineer"
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={jobTitle}
-            onChange={(e) => setJobTitle(e.target.value)} // Update job title state
-          />
-        </div>
+
         <div className="w-full max-w-md space-y-4">
           <button
             onClick={handleNext} // Navigate to the next page
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold text-lg hover:bg-blue-700 transition"
           >
-            Next
+            Get Started
           </button>
         </div>
+
         <p className="text-center text-gray-500 text-md mt-6 max-w-md">
           Posting a job is free. Reach a vast pool of qualified candidates and
           fill your role faster.
