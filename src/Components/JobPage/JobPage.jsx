@@ -1,30 +1,32 @@
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 import Select from "react-select";
 import {
   FaMapMarkerAlt,
   FaBriefcase,
-  FaTimes,
-  FaUserFriends,
-  FaClipboardList,
   FaArrowLeft,
   FaBookmark,
+  FaUserFriends,
+  FaClipboardList,
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const JobPage = () => {
+  const router = useRouter();
+  const { id } = router.query; // Get job ID from the URL query
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [showOverlay, setShowOverlay] = useState(false);
   const [searchRole, setSearchRole] = useState("");
   const [filterLocation, setFilterLocation] = useState(null);
   const [locations, setLocations] = useState([]);
-  const [savedJobs, setSavedJobs] = useState([]);
-  const [companies, setCompanies] = useState([]);
 
+  // Load saved jobs from localStorage when the component mounts
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedJobsFromStorage =
@@ -33,7 +35,7 @@ const JobPage = () => {
     }
   }, []);
 
-  // Fetch jobs and locations from the API
+  // Fetch jobs and highlight the job if ID is in the query
   useEffect(() => {
     axios
       .get("http://localhost:3000/jobs")
@@ -47,14 +49,17 @@ const JobPage = () => {
         ].map((location) => ({ value: location, label: location }));
         setLocations(uniqueLocations);
 
-        if (jobsData.length > 0) {
+        if (id) {
+          const jobToHighlight = jobsData.find((job) => job._id === id);
+          setSelectedJob(jobToHighlight);
+        } else if (jobsData.length > 0) {
           setSelectedJob(jobsData[0]);
         }
       })
       .catch((error) => console.error("Error fetching jobs:", error));
-  }, []);
+  }, [id]);
 
-  // Fetch companies from the API
+  // Fetch companies data for displaying additional company details
   useEffect(() => {
     axios
       .get("http://localhost:3000/companies")
@@ -77,7 +82,7 @@ const JobPage = () => {
   // Handle job selection
   const handleJobClick = (job) => {
     setSelectedJob(job);
-    setShowOverlay(true);
+    router.push(`/jobs?id=${job._id}`);
 
     const matchingCompany = companies.find(
       (company) => company.company_name === job.company_name
@@ -85,6 +90,7 @@ const JobPage = () => {
     setSelectedCompany(matchingCompany || null);
   };
 
+  // Handle job saving
   const handleSaveJob = async (job) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -213,9 +219,7 @@ const JobPage = () => {
                   handleSaveJob(job);
                 }}
                 className={`${
-                  savedJobs.includes(job._id)
-                    ? "text-blue-600"
-                    : "text-gray-400"
+                  savedJobs.includes(job._id) ? "text-blue-600" : "text-gray-400"
                 } hover:text-blue-600 transition`}
               >
                 <FaBookmark />
@@ -228,21 +232,9 @@ const JobPage = () => {
       {/* Right Column: Job Details */}
       <div
         className={`flex-1 overflow-y-auto p-6 ${
-          showOverlay
-            ? "fixed inset-0 bg-white z-50 md:static md:bg-transparent md:shadow-none"
-            : ""
+          selectedJob ? "" : "text-center text-gray-500"
         }`}
       >
-        {showOverlay && (
-          <button
-            onClick={() => setShowOverlay(false)}
-            className="mb-4 flex items-center text-blue-500 text-sm font-semibold md:hidden"
-          >
-            <FaArrowLeft className="mr-2" />
-            Back to Jobs
-          </button>
-        )}
-
         {selectedJob ? (
           <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto h-full space-y-6">
             <div className="flex items-center space-x-3">
@@ -330,9 +322,7 @@ const JobPage = () => {
               <h4 className="text-lg font-semibold text-gray-900">
                 About the job
               </h4>
-              <p className="text-gray-700 mt-2">
-                {selectedJob.job_description}
-              </p>
+              <p className="text-gray-700 mt-2">{selectedJob.job_description}</p>
             </div>
 
             {selectedCompany && (
