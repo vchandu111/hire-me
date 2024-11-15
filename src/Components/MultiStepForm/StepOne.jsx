@@ -9,7 +9,7 @@ import {
   FaBusinessTime,
   FaHome,
   FaCity,
-  FaCloud,
+  FaCloud,FaCloudUploadAlt
 } from "react-icons/fa";
 
 const StepOne = ({ companyData, setCompanyData, onSuccess }) => {
@@ -17,7 +17,9 @@ const StepOne = ({ companyData, setCompanyData, onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [employeeCount, setEmployeeCount] = useState(null);
-const router = useRouter()
+  const [avatarFile, setAvatarFile] = useState(null); // State to store selected file
+
+  const router = useRouter();
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -29,18 +31,36 @@ const router = useRouter()
     setEmployeeCount(value);
   };
 
+  const handleFileChange = (e) => {
+    setAvatarFile(e.target.files[0]); // Store the selected file
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    // Prepare form data with file upload
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append("company_name", formData.company_name);
+    formDataToSubmit.append(
+      "company_description",
+      formData.company_description
+    );
+    formDataToSubmit.append("company_location", formData.company_location);
+    formDataToSubmit.append("company_type", formData.company_type);
+    formDataToSubmit.append("industry_type", formData.industry_type);
+    formDataToSubmit.append("business_nature", formData.business_nature);
+    formDataToSubmit.append("employee_count", employeeCount);
+    formDataToSubmit.append("remote", formData.remote);
+    if (avatarFile) {
+      formDataToSubmit.append("company_avatar", avatarFile); // Add image file to form data
+    }
+
     try {
       const response = await fetch("http://localhost:3000/company", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...formData, employee_count: employeeCount }),
+        body: formDataToSubmit, // Use FormData as the request body
       });
 
       if (!response.ok) {
@@ -124,7 +144,7 @@ const router = useRouter()
           </div>
 
           {/* Company Avatar URL */}
-          <div>
+          {/* <div>
             <label className=" mb-2 block text-sm font-medium text-gray-700">
               Company Avatar URL
             </label>
@@ -136,6 +156,43 @@ const router = useRouter()
               value={formData.company_avatar}
               onChange={handleChange}
             />
+          </div> */}
+          {/* <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Company Avatar
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
+            />
+          </div> */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              Company Avatar
+            </label>
+            <div className="flex items-center space-x-4">
+              <label
+                htmlFor="file-upload"
+                className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <FaCloudUploadAlt className="text-blue-500 text-2xl mr-2" />
+                Choose File
+              </label>
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  handleFileChange(e);
+                }}
+                className="hidden"
+              />
+              <span className="text-sm text-gray-600 truncate">
+                {avatarFile ? avatarFile.name : "No file chosen"}
+              </span>
+            </div>
           </div>
 
           {/* Company Description */}

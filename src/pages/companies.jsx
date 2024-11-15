@@ -96,6 +96,14 @@ const Companies = () => {
     );
   };
 
+  const getAvatarUrl = (avatar) => {
+    // Check if the avatar is a relative path (starts with /uploads/)
+    if (avatar?.startsWith("/uploads/")) {
+      return `http://localhost:3000${avatar}`; // Prepend server base URL
+    }
+    return avatar; // Use the full URL as is
+  };
+
   const handleCompanyClick = (companyId) => {
     router.push(`/company/${companyId}`); // Navigate to individual company page
   };
@@ -262,9 +270,7 @@ const Companies = () => {
               className="flex items-center bg-white p-4 rounded-lg cursor-pointer shadow-md hover:shadow-lg transition-shadow border"
             >
               <img
-                src={
-                  company.company_avatar || "https://via.placeholder.com/100"
-                } // Default avatar if none
+                src={getAvatarUrl(company.company_avatar)}
                 alt={company.company_name}
                 className="w-14 h-14 rounded-md mr-4"
               />
