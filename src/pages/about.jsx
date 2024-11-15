@@ -44,7 +44,7 @@ const AboutUs = () => {
           </p>
         </div>
         <div className="flex flex-col md:flex-row gap-8">
-          <div className="bg-blue-100 p-6 rounded-lg shadow-md flex-1">
+          <div className="bg-blue-100 p-6 rounded-lg shadow-md flex-1 ">
             <FaBullseye className="text-blue-500 text-4xl mb-4" />
             <h3 className="text-2xl font-semibold text-blue-600">
               Our Mission

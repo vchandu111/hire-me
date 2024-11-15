@@ -1,3 +1,4 @@
+import Footer from "@/Components/Common/Footer";
 import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -56,7 +57,7 @@ const ContactUs = () => {
 
   return (
     <>
-      <div className="text-center mt-24 px-4">
+      <div className="text-center mt-24 px-4 ">
         <h2 className="text-3xl font-bold text-gray-800 mb-4 mt-10">
           Get in Touch
         </h2>
@@ -83,7 +84,7 @@ const ContactUs = () => {
               placeholder="Your Name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-red-500 placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 placeholder-gray-500"
             />
             <input
               type="email"
@@ -91,7 +92,7 @@ const ContactUs = () => {
               placeholder="Your Email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-red-500 placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 placeholder-gray-500"
             />
             <input
               type="text"
@@ -99,18 +100,18 @@ const ContactUs = () => {
               placeholder="Subject"
               value={formData.subject}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-red-500 placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 placeholder-gray-500"
             />
             <textarea
               name="message"
               placeholder="Message"
               value={formData.message}
               onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-red-500 h-32 resize-none placeholder-gray-500"
+              className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 h-32 resize-none placeholder-gray-500"
             ></textarea>
             <button
               type="submit"
-              className="w-full py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300 shadow-md"
+              className="w-full py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300 shadow-md"
             >
               Send Message
             </button>
@@ -119,6 +120,7 @@ const ContactUs = () => {
       </div>
 
       <ToastContainer />
+      <Footer/>
     </>
   );
 };

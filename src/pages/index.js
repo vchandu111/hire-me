@@ -8,6 +8,7 @@ import FeatureSection from "@/Components/HomePage/FeatureSection";
 import JobPosts from "@/Components/HomePage/JobPosts";
 import NewsletterSection from "@/Components/HomePage/NewsLetter";
 import PricingPlans from "@/Components/HomePage/PricingPlans";
+import Types from "@/Components/HomePage/Types";
 import WhyChooseUs from "@/Components/HomePage/WhyChooseUs";
 import WhyWeAreDifferent from "@/Components/HomePage/WhyWeAreDifferent";
 import React from "react";
@@ -21,7 +22,8 @@ const index = () => {
       <JobPosts />
       <ApplyProcess />
       {/* <CompanySection/> */}
-      <PricingPlans/>
+      <PricingPlans />
+      <Types/>
       <WhyWeAreDifferent />
       <WhyChooseUs />
       <NewsletterSection/>

@@ -1,8 +1,17 @@
-import Image from "next/image";
-import Link from "next/link";
+import { useState } from "react";
 import { FaSearch, FaMapMarkerAlt } from "react-icons/fa";
+import { useRouter } from "next/router";
+import Image from "next/image";
 
 const Banner = () => {
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const router = useRouter();
+
+  const handleSearch = () => {
+    // Navigate to the search results page with query parameters
+    router.push(`/search-results?title=${title}&location=${location}`);
+  };
   return (
     <section
       className="relative flex flex-col items-center md:flex-row md:justify-between py-24 md:py-40 px-6 sm:px-10 md:px-20 lg:px-32 text-white bg-cover bg-center overflow-hidden"
@@ -30,6 +39,7 @@ const Banner = () => {
             <FaSearch className="text-gray-400 mr-3" />
             <input
               type="text"
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="Job Title or Keyword"
               className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400"
             />
@@ -38,12 +48,16 @@ const Banner = () => {
           <div className="flex items-center flex-1 px-4 py-2 md:py-3 w-full">
             <FaMapMarkerAlt className="text-gray-400 mr-3" />
             <input
+              onChange={(e) => setLocation(e.target.value)}
               type="text"
               placeholder="Location"
               className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400"
             />
           </div>
-          <button className="bg-[#007ef0] text-white rounded-full py-3 px-8 font-semibold hover:bg-[#005bbd] transition w-full md:w-auto mt-2 md:mt-0">
+          <button
+            onClick={handleSearch}
+            className="bg-[#007ef0] text-white rounded-full py-3 px-8 font-semibold hover:bg-[#005bbd] transition w-full md:w-auto mt-2 md:mt-0"
+          >
             Find Job
           </button>
         </div>
