@@ -15,7 +15,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const JobPage = () => {
   const router = useRouter();
-  const { id } = router.query; // Get job ID from the URL query
+  const { id } = router.query;
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -25,17 +25,14 @@ const JobPage = () => {
   const [searchRole, setSearchRole] = useState("");
   const [filterLocation, setFilterLocation] = useState(null);
   const [locations, setLocations] = useState([]);
+  const [showOverlay, setShowOverlay] = useState(false);
 
-  // Load saved jobs from localStorage when the component mounts
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedJobsFromStorage =
-        JSON.parse(localStorage.getItem("savedJobs")) || [];
-      setSavedJobs(savedJobsFromStorage);
-    }
+    const savedJobsFromStorage =
+      JSON.parse(localStorage.getItem("savedJobs")) || [];
+    setSavedJobs(savedJobsFromStorage);
   }, []);
 
-  // Fetch jobs and highlight the job if ID is in the query
   useEffect(() => {
     axios
       .get("http://localhost:3000/jobs")
@@ -52,14 +49,15 @@ const JobPage = () => {
         if (id) {
           const jobToHighlight = jobsData.find((job) => job._id === id);
           setSelectedJob(jobToHighlight);
+          setShowOverlay(true);
         } else if (jobsData.length > 0) {
-          setSelectedJob(jobsData[0]);
+          setSelectedJob(jobsData[0]); // Set the first job as selected by default
+          setShowOverlay(true);
         }
       })
       .catch((error) => console.error("Error fetching jobs:", error));
   }, [id]);
 
-  // Fetch companies data for displaying additional company details
   useEffect(() => {
     axios
       .get("http://localhost:3000/companies")
@@ -69,7 +67,6 @@ const JobPage = () => {
       .catch((error) => console.error("Error fetching companies:", error));
   }, []);
 
-  // Filter jobs based on searchRole and filterLocation
   useEffect(() => {
     const filtered = jobs.filter(
       (job) =>
@@ -79,18 +76,15 @@ const JobPage = () => {
     setFilteredJobs(filtered);
   }, [searchRole, filterLocation, jobs]);
 
-  // Handle job selection
   const handleJobClick = (job) => {
     setSelectedJob(job);
-    router.push(`/jobs?id=${job._id}`);
-
+    setShowOverlay(true);
     const matchingCompany = companies.find(
       (company) => company.company_name === job.company_name
     );
     setSelectedCompany(matchingCompany || null);
   };
 
-  // Handle job saving
   const handleSaveJob = async (job) => {
     try {
       const userId = localStorage.getItem("userId");
@@ -120,7 +114,6 @@ const JobPage = () => {
     }
   };
 
-  // Helper function to get initials from company name
   const getInitials = (companyName) => {
     const words = companyName.split(" ");
     const initials = words[0][0] + (words[1] ? words[1][0] : "");
@@ -132,7 +125,11 @@ const JobPage = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Left Column: Job List */}
-      <div className="w-full md:w-1/3 h-full md:h-screen sticky top-0 overflow-y-auto bg-white border-r border-gray-200">
+      <div
+        className={`w-full md:w-1/3 h-full md:h-screen sticky top-0 overflow-y-auto bg-white border-r border-gray-200 ${
+          showOverlay ? "hidden md:block" : "block"
+        }`}
+      >
         <div className="sticky top-0 bg-white p-4 border-b border-gray-200 z-10">
           <h2 className="text-blue-600 font-bold text-xl mb-4 flex items-center">
             <FaBriefcase className="mr-2 text-blue-500" /> Job Filters
@@ -219,7 +216,9 @@ const JobPage = () => {
                   handleSaveJob(job);
                 }}
                 className={`${
-                  savedJobs.includes(job._id) ? "text-blue-600" : "text-gray-400"
+                  savedJobs.includes(job._id)
+                    ? "text-blue-600"
+                    : "text-gray-400"
                 } hover:text-blue-600 transition`}
               >
                 <FaBookmark />
@@ -232,10 +231,22 @@ const JobPage = () => {
       {/* Right Column: Job Details */}
       <div
         className={`flex-1 overflow-y-auto p-6 ${
-          selectedJob ? "" : "text-center text-gray-500"
+          showOverlay
+            ? "fixed inset-0 bg-white z-50 md:static"
+            : "hidden md:block"
         }`}
       >
-        {selectedJob ? (
+        {showOverlay && (
+          <button
+            onClick={() => setShowOverlay(false)}
+            className="mb-4 flex items-center text-blue-500 text-sm font-semibold md:hidden"
+          >
+            <FaArrowLeft className="mr-2" />
+            Back to Jobs
+          </button>
+        )}
+
+        {selectedJob && (
           <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto h-full space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full font-bold text-lg">
@@ -322,7 +333,9 @@ const JobPage = () => {
               <h4 className="text-lg font-semibold text-gray-900">
                 About the job
               </h4>
-              <p className="text-gray-700 mt-2">{selectedJob.job_description}</p>
+              <p className="text-gray-700 mt-2">
+                {selectedJob.job_description}
+              </p>
             </div>
 
             {selectedCompany && (
@@ -355,10 +368,6 @@ const JobPage = () => {
               </div>
             )}
           </div>
-        ) : (
-          <p className="text-center text-gray-500">
-            Select a job to view details
-          </p>
         )}
       </div>
     </div>
