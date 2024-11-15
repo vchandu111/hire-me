@@ -8,16 +8,30 @@ import {
   FaUserFriends,
   FaClipboardList,
   FaArrowLeft,
+  FaBookmark,
 } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const JobPage = () => {
   const [jobs, setJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedCompany, setSelectedCompany] = useState(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [searchRole, setSearchRole] = useState("");
   const [filterLocation, setFilterLocation] = useState(null);
   const [locations, setLocations] = useState([]);
+  const [savedJobs, setSavedJobs] = useState([]);
+  const [companies, setCompanies] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedJobsFromStorage =
+        JSON.parse(localStorage.getItem("savedJobs")) || [];
+      setSavedJobs(savedJobsFromStorage);
+    }
+  }, []);
 
   // Fetch jobs and locations from the API
   useEffect(() => {
@@ -28,18 +42,26 @@ const JobPage = () => {
         setJobs(jobsData);
         setFilteredJobs(jobsData);
 
-        // Extract unique locations for dropdown
         const uniqueLocations = [
           ...new Set(jobsData.map((job) => job.place)),
         ].map((location) => ({ value: location, label: location }));
         setLocations(uniqueLocations);
 
-        // Set the first job as the default selected job
         if (jobsData.length > 0) {
           setSelectedJob(jobsData[0]);
         }
       })
       .catch((error) => console.error("Error fetching jobs:", error));
+  }, []);
+
+  // Fetch companies from the API
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/companies")
+      .then((response) => {
+        setCompanies(response.data);
+      })
+      .catch((error) => console.error("Error fetching companies:", error));
   }, []);
 
   // Filter jobs based on searchRole and filterLocation
@@ -56,6 +78,40 @@ const JobPage = () => {
   const handleJobClick = (job) => {
     setSelectedJob(job);
     setShowOverlay(true);
+
+    const matchingCompany = companies.find(
+      (company) => company.company_name === job.company_name
+    );
+    setSelectedCompany(matchingCompany || null);
+  };
+
+  const handleSaveJob = async (job) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        toast.error("Please log in to save jobs.");
+        return;
+      }
+
+      const response = await fetch("http://localhost:3000/save-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, job }),
+      });
+
+      if (response.ok) {
+        setSavedJobs((prev) => [...prev, job._id]);
+        localStorage.setItem(
+          "savedJobs",
+          JSON.stringify([...savedJobs, job._id])
+        );
+        toast.success("Job saved successfully!");
+      } else {
+        toast.error("Failed to save job. Try again later.");
+      }
+    } catch (error) {
+      toast.error("Error saving job. Please try again later.");
+    }
   };
 
   // Helper function to get initials from company name
@@ -67,15 +123,15 @@ const JobPage = () => {
 
   return (
     <div className="container m-auto flex flex-col md:flex-row min-h-screen bg-[#f3f2ee]">
+      <ToastContainer position="top-right" autoClose={3000} />
+
       {/* Left Column: Job List */}
       <div className="w-full md:w-1/3 h-full md:h-screen sticky top-0 overflow-y-auto bg-white border-r border-gray-200">
-        {/* Sticky Filter Section at the Top */}
         <div className="sticky top-0 bg-white p-4 border-b border-gray-200 z-10">
           <h2 className="text-blue-600 font-bold text-xl mb-4 flex items-center">
             <FaBriefcase className="mr-2 text-blue-500" /> Job Filters
           </h2>
-          
-          {/* Search by Job Role */}
+
           <div className="relative mb-4">
             <FaBriefcase className="absolute left-3 top-3 text-blue-500" />
             <input
@@ -87,7 +143,6 @@ const JobPage = () => {
             />
           </div>
 
-          {/* Filter by Location */}
           <div className="relative">
             <FaMapMarkerAlt className="absolute left-3 top-3 text-blue-500 z-10 pointer-events-none" />
             <Select
@@ -116,7 +171,6 @@ const JobPage = () => {
           </div>
         </div>
 
-        {/* Job List */}
         <div className="overflow-y-auto">
           <h2 className="text-blue-500 font-semibold text-lg p-4 underline">
             Recently Added Jobs
@@ -129,7 +183,6 @@ const JobPage = () => {
                 selectedJob?._id === job._id ? "bg-blue-100" : ""
               } hover:bg-blue-50 transition duration-150 ease-in-out`}
             >
-              {/* Company Logo or Initials */}
               <div className="w-12 h-12 mr-4 flex items-center justify-center bg-blue-500 text-white rounded-full font-bold">
                 {job.company_avatar ? (
                   <img
@@ -142,20 +195,31 @@ const JobPage = () => {
                 )}
               </div>
 
-              {/* Job Information */}
               <div className="flex-grow">
                 <h3 className="text-lg font-semibold text-blue-500">
                   {job.job_title}
                 </h3>
-                <p className="text-gray-700">{job.company_name}</p>
-                <div className="flex items-center text-gray-500 text-sm mt-2">
+                <p className="text-gray-700 font-semibold">
+                  {job.company_name}
+                </p>
+                <div className="flex items-center text-gray-500 text-sm mt-2 font-semibold">
                   <FaMapMarkerAlt className="mr-1" />
                   {job.place} {job.remote}
                 </div>
-                <p className="text-gray-600 text-sm mt-1">{job.job_type}</p>
               </div>
-              {/* Close button */}
-              
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSaveJob(job);
+                }}
+                className={`${
+                  savedJobs.includes(job._id)
+                    ? "text-blue-600"
+                    : "text-gray-400"
+                } hover:text-blue-600 transition`}
+              >
+                <FaBookmark />
+              </button>
             </div>
           ))}
         </div>
@@ -180,10 +244,8 @@ const JobPage = () => {
         )}
 
         {selectedJob ? (
-          <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto h-full space-y-4">
-            {/* Company Logo and Title */}
+          <div className="bg-white p-6 rounded-lg shadow-lg overflow-y-auto h-full space-y-6">
             <div className="flex items-center space-x-3">
-              {/* Company Logo */}
               <div className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full font-bold text-lg">
                 {selectedJob.company_avatar ? (
                   <img
@@ -195,58 +257,118 @@ const JobPage = () => {
                   getInitials(selectedJob.company_name)
                 )}
               </div>
-              
-              {/* Company Name and Job Title */}
+
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">{selectedJob.company_name}</h3>
-                <h4 className="text-2xl font-bold text-gray-900">{selectedJob.job_title}</h4>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {selectedJob.company_name}
+                </h3>
+                <h4 className="text-2xl font-bold text-gray-900">
+                  {selectedJob.job_title}
+                </h4>
               </div>
             </div>
 
-            {/* Job Location, Posted Time, and Applicants */}
-            <div className="flex items-center text-gray-500 text-sm space-x-2">
-              <FaMapMarkerAlt className="text-gray-400" />
-              <span>{selectedJob.place}, {selectedJob.remote}</span>
-              <span className="mx-1">·</span>
-              <span>2 weeks ago</span>
-              <span className="mx-1">·</span>
-              <span>Over {selectedJob.no_of_application} applicants</span>
+            <div className="flex items-center text-gray-700 space-x-2">
+              <FaMapMarkerAlt className="text-blue-500" />
+              <span className="text-blue-600 font-semibold">
+                {selectedJob.place}, {selectedJob.remote}
+              </span>
             </div>
 
-            {/* Job Type, Experience Level */}
-            <div className="flex items-center text-gray-600 text-sm space-x-2">
-              <FaBriefcase className="text-gray-400" />
-              <span>{selectedJob.remote}</span>
-              <span className="mx-1">·</span>
-              <span>{selectedJob.job_type}</span>
-              <span className="mx-1">·</span>
-              <span>{selectedJob.experience_level}</span>
+            <div className="flex space-x-4 items-center text-sm text-gray-600 font-semibold">
+              <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full">
+                ₹{selectedJob.salary}/year
+              </span>
+              <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full">
+                {selectedJob.work_mode}
+              </span>
+              <span className="px-2 py-1 bg-green-100 text-green-600 rounded-full">
+                {selectedJob.job_type}
+              </span>
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-600 rounded-full">
+                {selectedJob.experience_level}
+              </span>
             </div>
 
-            {/* Alumni and Skills */}
-            <div className="flex items-center text-gray-600 text-sm space-x-2">
-              <FaUserFriends className="text-gray-400" />
-              <span>3 school alumni work here</span>
-            </div>
-            <div className="flex items-center text-gray-600 text-sm space-x-2">
-              <FaClipboardList className="text-gray-400" />
-              <span>Skills: {selectedJob.skills.slice(0, 2).join(", ")}, +{selectedJob.skills.length - 2} more</span>
+            <div className="space-y-4 bg-white">
+              <div className="flex items-center text-gray-600 text-sm">
+                <FaUserFriends className="text-blue-600" />
+                <span className="font-semibold text-blue-600 mx-2">
+                  {Math.floor(Math.random() * 50) + 1} alumni work here
+                </span>
+              </div>
+
+              <div className="flex items-center text-gray-600 text-sm space-x-2">
+                <FaClipboardList className="text-green-600" />
+                <span className="font-semibold text-green-600">
+                  Skills: {selectedJob.skills.slice(0, 2).join(", ")}, +
+                  {selectedJob.skills.length - 2} more
+                </span>
+              </div>
             </div>
 
-            {/* Job Description */}
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900">About the job</h4>
-              <p className="text-gray-700 mt-2">{selectedJob.job_description}</p>
+            <div className="flex space-x-4 mt-4">
+              <button className="flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition">
+                Easy Apply
+              </button>
+              <button
+                className={`px-4 py-2 border border-blue-600 text-blue-600 font-semibold rounded-full hover:bg-blue-600 hover:text-white transition ${
+                  savedJobs.includes(selectedJob._id)
+                    ? "bg-blue-600 text-white"
+                    : ""
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleSaveJob(selectedJob);
+                }}
+              >
+                Save
+              </button>
             </div>
 
-            {/* Company Description */}
-            <div>
-              <h4 className="text-lg font-semibold text-gray-900">About the company</h4>
-              <p className="text-gray-700 mt-2">{selectedJob.company_description}</p>
+            <div className="mt-6">
+              <h4 className="text-lg font-semibold text-gray-900">
+                About the job
+              </h4>
+              <p className="text-gray-700 mt-2">
+                {selectedJob.job_description}
+              </p>
             </div>
+
+            {selectedCompany && (
+              <div className="mt-6">
+                <h4 className="text-lg font-semibold text-gray-900">
+                  About the company
+                </h4>
+                <div className="flex items-center mt-2">
+                  <img
+                    src={selectedCompany.company_avatar}
+                    alt={selectedCompany.company_name}
+                    className="w-10 h-10 mr-3 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-gray-800 font-bold">
+                      {selectedCompany.company_name}
+                    </p>
+                    <p className="text-gray-600">
+                      {selectedCompany.company_location}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      {selectedCompany.industry_type} -{" "}
+                      {selectedCompany.business_nature}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mt-2">
+                  {selectedCompany.company_description}
+                </p>
+              </div>
+            )}
           </div>
         ) : (
-          <p className="text-center text-gray-500">Select a job to view details</p>
+          <p className="text-center text-gray-500">
+            Select a job to view details
+          </p>
         )}
       </div>
     </div>

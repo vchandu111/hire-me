@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FiMenu, FiX } from "react-icons/fi";
+import { FaChevronDown } from "react-icons/fa"; // Corrected import for FaChevronDown
+
 import {
   SignedIn,
   SignedOut,
@@ -12,6 +14,11 @@ import {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isLoaded } = useUser();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen((prev) => !prev);
+  };
 
   // Log user and isLoaded status for debugging
   useEffect(() => {
@@ -66,11 +73,47 @@ const Navbar = () => {
             <SignedIn>
               <div className="flex items-center space-x-4">
                 {/* Posted Jobs link */}
-                <Link href="/jobs-posted">
+                {/* <Link href="/jobs-posted">
                   <span className="text-gray-700 font-medium hover:text-[#007ef0] transition-colors duration-200">
                     Posted Jobs
                   </span>
-                </Link>
+                </Link> */}
+                <div className="relative inline-block">
+                  {/* My Account Button */}
+                  <div
+                    onClick={toggleDropdown}
+                    className="flex items-center cursor-pointer text-gray-700 font-medium hover:text-[#007ef0] transition-colors duration-200"
+                  >
+                    My Account
+                    <FaChevronDown className="ml-1" />
+                  </div>
+
+                  {/* Dropdown Menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      <ul className="py-2">
+                        <li>
+                          <Link
+                            href="/jobs-posted" // Replace with your actual route for posted jobs
+                            className="block px-4 py-2 text-gray-700 hover:bg-[#007ef0] hover:text-white transition-colors duration-200"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            Posted Jobs
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            href="/jobs-saved" // Replace with your actual route for saved jobs
+                            className="block px-4 py-2 text-gray-700 hover:bg-[#007ef0] hover:text-white transition-colors duration-200"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            Saved Jobs
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
                 {/* Post a Job button */}
                 <Link href="/post-job">
                   <button className="bg-blue-500 font-semibold text-white px-4 py-1 rounded-full hover:bg-blue-600 transition-colors duration-200">
@@ -88,6 +131,7 @@ const Navbar = () => {
                 </div>
               </div>
             </SignedIn>
+            
           </div>
 
           {/* Mobile Menu Button */}
