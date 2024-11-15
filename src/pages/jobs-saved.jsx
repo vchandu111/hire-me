@@ -1,3 +1,4 @@
+import Loader from "@/Components/Common/Loader";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import {
@@ -33,8 +34,7 @@ const SavedJobs = () => {
     fetchSavedJobs();
   }, []);
 
-  if (loading)
-    return <div className="text-center py-8">Loading saved jobs...</div>;
+  if (loading) return <Loader />;
 
   console.log(savedJobs);
   return (

@@ -221,7 +221,6 @@ const JobPage = () => {
 
   return (
     <div className="container m-auto flex flex-col md:flex-row min-h-screen bg-[#f3f2ee]">
-      <ToastContainer position="top-right" autoClose={3000} />
 
       {/* Left Column: Job List */}
       <div

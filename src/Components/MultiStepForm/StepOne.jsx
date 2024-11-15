@@ -9,8 +9,10 @@ import {
   FaBusinessTime,
   FaHome,
   FaCity,
-  FaCloud,FaCloudUploadAlt
+  FaCloud,
+  FaCloudUploadAlt,
 } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const StepOne = ({ companyData, setCompanyData, onSuccess }) => {
   const [formData, setFormData] = useState(companyData);
@@ -70,9 +72,12 @@ const StepOne = ({ companyData, setCompanyData, onSuccess }) => {
 
       const result = await response.json();
       setCompanyData(result); // Update company data in parent
-      onSuccess(); // Move to the next step
+      toast.success("Company created successfully!, Moving to Step-2", {
+        onClose: () => onSuccess(), // Move to the next step after the toast is closed
+      });
     } catch (error) {
       setErrorMessage(error.message);
+      toast.error(error.message);
     } finally {
       setIsSubmitting(false);
     }

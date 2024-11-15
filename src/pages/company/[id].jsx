@@ -9,6 +9,7 @@ import {
   FaUsers,
   FaBriefcase,
 } from "react-icons/fa";
+import Loader from "@/Components/Common/Loader";
 
 const CompanyDetail = () => {
   const router = useRouter();
@@ -54,7 +55,7 @@ const CompanyDetail = () => {
       .catch((error) => console.error("Error fetching jobs:", error));
   }, [company]);
 
-  if (!company) return <p>Loading...</p>;
+  if (!company) return <Loader />;
 
   return (
     <div className="flex min-h-screen bg-gray-100">

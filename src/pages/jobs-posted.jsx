@@ -1,3 +1,4 @@
+import Loader from "@/Components/Common/Loader";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import {
@@ -26,6 +27,7 @@ const JobsPosted = () => {
         }
 
         const jobs = await response.json();
+        console.log(jobs);
         const userSpecificJobs = jobs.filter((job) => job.userId === userId);
         setUserJobs(userSpecificJobs);
       } catch (error) {
@@ -38,7 +40,8 @@ const JobsPosted = () => {
     fetchUserJobs();
   }, []);
 
-  if (loading) return <div className="text-center py-8">Loading jobs...</div>;
+  console.log(userJobs);
+  if (loading) return <Loader />;
 
   return (
     <div className="container mx-auto p-6  min-h-screen">
@@ -76,10 +79,10 @@ const JobsPosted = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => router.push(`/jobs?id=${job._id}`)}
+                  onClick={() => router.push(`/applicants?id=${job._id}`)}
                   className="flex items-center px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-md hover:bg-blue-700"
                 >
-                  View <FaArrowRight className="ml-2" />
+                  View Applicants <FaArrowRight className="ml-2" />
                 </button>
               </div>
             </div>

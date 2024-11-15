@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaStar, FaSearch, FaFilter } from "react-icons/fa";
 import { useRouter } from "next/router"; // Import useRouter
+import Loader from "@/Components/Common/Loader";
 
 const Companies = () => {
   const [companies, setCompanies] = useState([]);
@@ -123,8 +124,7 @@ const Companies = () => {
     applyFilters();
   }, [selectedLocations, selectedCompanyTypes, searchCompanyName]);
 
-  if (loading)
-    return <p className="text-center text-gray-500 mt-4">Loading...</p>;
+  if (loading) return <Loader />;
 
   return (
     <div className="flex flex-col lg:flex-row bg-gray-50 min-h-screen">

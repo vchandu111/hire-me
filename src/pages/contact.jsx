@@ -119,7 +119,6 @@ const ContactUs = () => {
         </div>
       </div>
 
-      <ToastContainer />
       <Footer/>
     </>
   );

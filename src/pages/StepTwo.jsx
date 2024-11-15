@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const cardData = [
   {
@@ -127,13 +128,14 @@ export default function StepTwo() {
         const errorText = await response.text();
         console.error("Response status:", response.status);
         console.error("Response text:", errorText);
-        throw new Error("Failed to submit job post");
+        toast.error("Failed to submit job post");
       }
 
       const result = await response.json();
-      console.log("Job posted successfully:", result);
+      toast.success("Job created successfully!!");
+      router.push("/jobs");
     } catch (error) {
-      console.error("Error posting job:", error);
+      toast.error("Error posting job:", error);
     }
   };
 
