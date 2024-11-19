@@ -7,14 +7,20 @@ import {
   FaBookmark,
   FaArrowRight,
 } from "react-icons/fa";
+import { useUserContext } from "../Components/Context/UserContext";
 
 const SavedJobs = () => {
   const [savedJobs, setSavedJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { userId } = useUserContext(); // Access userId from context
+
+  console.log(userId);
+
   useEffect(() => {
     const fetchSavedJobs = async () => {
-      const userId = localStorage.getItem("userId");
+      if (!userId) return; // Only fetch if userId is available
+
       try {
         const response = await fetch("http://localhost:3000/saved-jobs"); // Fetch all saved jobs
         if (!response.ok) throw new Error("Failed to fetch saved jobs");
@@ -32,11 +38,10 @@ const SavedJobs = () => {
     };
 
     fetchSavedJobs();
-  }, []);
+  }, [userId]); // Run the effect only when userId changes
 
   if (loading) return <Loader />;
 
-  console.log(savedJobs);
   return (
     <div className="container mx-auto p-6 bg-white min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-center text-blue-600">

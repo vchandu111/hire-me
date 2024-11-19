@@ -12,6 +12,7 @@ import {
   FaRupeeSign,
   FaPhoneAlt,
   FaCheck,
+  FaCloudUploadAlt,
 } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -61,9 +62,9 @@ const JobPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // const handleFileChange = (e) => {
-  //   setFormData((prev) => ({ ...prev, resume: e.target.files[0] }));
-  // };
+  const handleFileChange = (e) => {
+    setFormData((prev) => ({ ...prev, resume: e.target.files[0] }));
+  };
 
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
@@ -79,21 +80,25 @@ const JobPage = () => {
       return;
     }
 
-    const applicationData = {
-      jobId: selectedJob._id,
-      userId,
-      email: formData.email,
-      phone: formData.phone,
-      currentCTC: formData.currentCTC,
-      expectedCTC: formData.expectedCTC,
-      noticePeriod: formData.noticePeriod,
-    };
+    // Use FormData for file uploads
+    const applicationData = new FormData();
+    applicationData.append("jobId", selectedJob._id);
+    applicationData.append("userId", userId);
+    applicationData.append("email", formData.email);
+    applicationData.append("phone", formData.phone);
+    applicationData.append("currentCTC", formData.currentCTC);
+    applicationData.append("expectedCTC", formData.expectedCTC);
+    applicationData.append("noticePeriod", formData.noticePeriod);
+
+    // Append the resume file only if it exists
+    if (formData.resume) {
+      applicationData.append("resume", formData.resume);
+    }
 
     try {
       const response = await fetch("http://localhost:3000/apply-job", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(applicationData),
+        body: applicationData, // Send FormData directly
       });
 
       if (response.ok) {
@@ -107,6 +112,7 @@ const JobPage = () => {
           currentCTC: "",
           expectedCTC: "",
           noticePeriod: "",
+          resume: null, // Clear the resume file
         });
 
         // Mark the job as applied
@@ -217,11 +223,11 @@ const JobPage = () => {
     return initials.toUpperCase();
   };
 
-  console.log(filteredJobs)
+  console.log(filteredJobs, "Filtered jobs");
+  console.log(companies, "companies");
 
   return (
     <div className="container m-auto flex flex-col md:flex-row min-h-screen bg-[#f3f2ee]">
-
       {/* Left Column: Job List */}
       <div
         className={`w-full md:w-1/3 h-full md:h-screen sticky top-0 overflow-y-auto bg-white border-r border-gray-200 ${
@@ -272,12 +278,12 @@ const JobPage = () => {
           </div>
         </div>
 
-        <div className="overflow-y-auto">
+        {/* <div className="overflow-y-auto">
           <h2 className="text-blue-500 font-semibold text-lg p-4 underline">
             Recently Added Jobs
           </h2>
           {filteredJobs.map((job) => (
-            <div 
+            <div
               key={job._id}
               onClick={() => handleJobClick(job)}
               className={`p-4 cursor-pointer flex items-start ${
@@ -323,6 +329,70 @@ const JobPage = () => {
               </button>
             </div>
           ))}
+        </div> */}
+        <div className="overflow-y-auto">
+          <h2 className="text-blue-500 font-semibold text-lg p-4 underline">
+            Recently Added Jobs
+          </h2>
+          {filteredJobs.map((job) => {
+            // Find matching company in companies array
+            const matchingCompany = companies.find(
+              (company) => company.company_name === job.company_name
+            );
+
+            // Use the company's avatar if it exists; fallback to job data or initials
+            const companyAvatar = matchingCompany
+              ? matchingCompany.company_avatar
+              : job.company_avatar;
+
+            return (
+              <div
+                key={job._id}
+                onClick={() => handleJobClick(job)}
+                className={`p-4 cursor-pointer flex items-start ${
+                  selectedJob?._id === job._id ? "bg-blue-100" : ""
+                } hover:bg-blue-50 transition duration-150 ease-in-out`}
+              >
+                <div className="w-12 h-12 mr-4 flex items-center justify-center bg-blue-500 text-white rounded-full font-bold">
+                  {companyAvatar ? (
+                    <img
+                      src={companyAvatar}
+                      alt={job.company_name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    getInitials(job.company_name)
+                  )}
+                </div>
+
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold text-blue-500">
+                    {job.job_title}
+                  </h3>
+                  <p className="text-gray-700 font-semibold">
+                    {job.company_name}
+                  </p>
+                  <div className="flex items-center text-gray-500 text-sm mt-2 font-semibold">
+                    <FaMapMarkerAlt className="mr-1" />
+                    {job.place} {job.remote}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSaveJob(job);
+                  }}
+                  className={`${
+                    savedJobs.includes(job._id)
+                      ? "text-blue-600"
+                      : "text-gray-400"
+                  } hover:text-blue-600 transition`}
+                >
+                  <FaBookmark />
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -537,19 +607,33 @@ const JobPage = () => {
               </div>
 
               {/* Upload Resume */}
-              {/* <div>
+              {/* Upload Resume */}
+              {/* Upload Resume */}
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Upload Resume
                 </label>
-                <div className="flex items-center  rounded-lg p-2">
+                <div className="flex items-center space-x-4">
+                  <label
+                    htmlFor="resume-upload"
+                    className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    <FaCloudUploadAlt className="text-blue-500 text-2xl mr-2" />
+                    Choose File
+                  </label>
                   <input
+                    id="resume-upload"
                     type="file"
-                    onChange={handleFileChange}
-                    className="w-full border-none focus:outline-none focus:ring-0"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => handleFileChange(e)}
+                    className="hidden"
                     required
                   />
+                  <span className="text-sm text-gray-600 truncate">
+                    {formData.resume ? formData.resume.name : "No file chosen"}
+                  </span>
                 </div>
-              </div> */}
+              </div>
 
               {/* Current CTC */}
               <div>

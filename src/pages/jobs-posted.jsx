@@ -1,33 +1,26 @@
-import Loader from "@/Components/Common/Loader";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import {
-  FaMapMarkerAlt,
-  FaDollarSign,
-  FaBookmark,
-  FaArrowRight,
-} from "react-icons/fa";
+import { useRouter } from "next/router";
+import { FaMapMarkerAlt, FaArrowRight } from "react-icons/fa";
+import { useUserContext } from "../Components/Context/UserContext";
+import Loader from "@/Components/Common/Loader";
 
 const JobsPosted = () => {
   const [userJobs, setUserJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { userId } = useUserContext(); // Access userId from context
   const router = useRouter();
+
   useEffect(() => {
+    if (!userId) return; // Wait until userId is available
+
     const fetchUserJobs = async () => {
       try {
-        const userId = localStorage.getItem("userId");
-        if (!userId) {
-          console.error("No user ID found in local storage.");
-          return;
-        }
-
         const response = await fetch("http://localhost:3000/jobs"); // Adjust API endpoint as needed
         if (!response.ok) {
           throw new Error("Failed to fetch jobs");
         }
 
         const jobs = await response.json();
-        console.log(jobs);
         const userSpecificJobs = jobs.filter((job) => job.userId === userId);
         setUserJobs(userSpecificJobs);
       } catch (error) {
@@ -38,13 +31,17 @@ const JobsPosted = () => {
     };
 
     fetchUserJobs();
-  }, []);
+  }, [userId]); // Fetch data whenever userId changes
 
-  console.log(userJobs);
-  if (loading) return <Loader />;
+  if (loading || !userId) {
+    // Display loader until userId is available and data is fetched
+    return (
+      <Loader/>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6  min-h-screen">
+    <div className="container mx-auto p-6 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-center text-blue-600">
         Your Posted Jobs
       </h1>

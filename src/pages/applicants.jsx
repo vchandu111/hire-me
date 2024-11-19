@@ -1,7 +1,15 @@
 import Loader from "@/Components/Common/Loader";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-
+import {
+  FaEnvelope,
+  FaDownload,
+  FaPhone,
+  FaBriefcase,
+  FaMapMarkerAlt,
+  FaMoneyBillAlt,
+  FaClock,
+} from "react-icons/fa";
 const Applicants = () => {
   const router = useRouter();
   const { id } = router.query; // Extract jobId from URL
@@ -60,56 +68,76 @@ const Applicants = () => {
         Job Applicants
       </h1>
       {filteredApplicants.length > 0 ? (
-        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="container m-auto grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mt-20" >
           {filteredApplicants.map((applicant) => (
             <div
               key={applicant._id}
-              className="bg-gradient-to-r from-blue-100 via-white to-blue-50 border rounded-lg shadow-lg p-6 transition duration-300 hover:shadow-2xl hover:border-blue-500 relative flex flex-col justify-between h-full"
+              className="bg-white border rounded-lg shadow-lg p-6 transition duration-300 hover:shadow-xl hover:border-blue-500 relative flex flex-col justify-between h-full"
             >
+              {/* Application Date */}
               <div className="absolute -top-3 -right-3 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
                 {new Date(applicant.appliedAt).toLocaleDateString()}
               </div>
 
+              {/* Job Details */}
               <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  {applicant.jobId.job_title}
+                <h2 className="text-lg font-semibold text-blue-600 truncate flex items-center space-x-2">
+                  <FaBriefcase className="text-blue-500" />
+                  <span>{applicant.jobId.job_title}</span>
                 </h2>
-                <p className="text-sm text-gray-600">
-                  {applicant.jobId.company_name}
-                </p>
-                <p className="text-sm text-gray-500">{applicant.jobId.place}</p>
               </div>
 
-              <div className="mb-4">
-                <h3 className="text-md font-semibold text-gray-600">
+              {/* Divider */}
+              <div className="border-t border-gray-200 my-2"></div>
+
+              {/* Applicant Info */}
+              <div className="mb-4 space-y-1">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase">
                   Applicant Info
                 </h3>
-                <p className="text-sm text-gray-800">
-                  <strong>Email:</strong> {applicant.email}
+                <p className="text-sm text-gray-800 flex items-center space-x-2">
+                  <FaEnvelope className="text-blue-500" />
+                  <span>{applicant.email}</span>
                 </p>
-                <p className="text-sm text-gray-800">
-                  <strong>Phone:</strong> {applicant.phone}
+                <p className="text-sm text-gray-800 flex items-center space-x-2">
+                  <FaPhone className="text-blue-500" />
+                  <span>{applicant.phone}</span>
                 </p>
               </div>
 
-              <div className="mb-4">
-                <h3 className="text-md font-semibold text-gray-600">
+              {/* Divider */}
+              <div className="border-t border-gray-200 my-2"></div>
+
+              {/* CTC Details */}
+              <div className="mb-4 space-y-1">
+                <h3 className="text-sm font-semibold text-gray-700 uppercase">
                   CTC Details
                 </h3>
-                <p className="text-sm text-gray-800">
-                  <strong>Current CTC:</strong> {applicant.currentCTC} LPA
+                <p className="text-sm text-gray-800 flex items-center space-x-2">
+                  <FaMoneyBillAlt className="text-green-500" />
+                  <span>Current: {applicant.currentCTC} LPA</span>
                 </p>
-                <p className="text-sm text-gray-800">
-                  <strong>Expected CTC:</strong> {applicant.expectedCTC} LPA
+                <p className="text-sm text-gray-800 flex items-center space-x-2">
+                  <FaMoneyBillAlt className="text-green-500" />
+                  <span>Expected: {applicant.expectedCTC} LPA</span>
                 </p>
-                <p className="text-sm text-gray-800">
-                  <strong>Notice Period:</strong> {applicant.noticePeriod} days
+                <p className="text-sm text-gray-800 flex items-center space-x-2">
+                  <FaClock className="text-yellow-500" />
+                  <span>Notice: {applicant.noticePeriod} days</span>
                 </p>
               </div>
 
-              <button className="mt-4 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition">
-                View Full Details
-              </button>
+              {/* Download Resume Button */}
+              <a
+                href={`http://localhost:3000${applicant.resumePath}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition text-center inline-flex items-center justify-center space-x-2"
+                download
+              >
+                <FaDownload className="text-white text-lg" />
+                <span>Download Resume</span>
+              </a>
             </div>
           ))}
         </div>

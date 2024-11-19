@@ -26,7 +26,7 @@ const Banner = () => {
       {/* Content Section */}
       <div className="relative z-10 w-full md:w-2/3 text-center md:text-left space-y-6">
         <h1 className="text-4xl md:text-5xl md:w-3/4 lg:text-6xl font-bold text-white leading-tight">
-          Find the perfect <span className="text-blue-400">job</span> for you
+          Find or Post  Your Perfect <span className="text-blue-400">Job</span> Today!
         </h1>
         <p className="text-white text-lg">
           Search your career opportunity through{" "}

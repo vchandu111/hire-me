@@ -55,7 +55,6 @@ const Navbar = () => {
     { label: "Companies", href: "/companies" },
     { label: "About Us", href: "/about" },
     { label: "Contact Us", href: "/contact" },
-    { label: "Blog", href: "/blog" },
   ];
 
   const accountItems = [

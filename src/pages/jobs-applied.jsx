@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { FaMapMarkerAlt, FaArrowRight } from "react-icons/fa";
+import { useUserContext } from "../Components/Context/UserContext";
+import Loader from "@/Components/Common/Loader";
 
 const JobsApplied = () => {
-  const [appliedJobs, setAppliedJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState([]);
-  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true); // Add loading state for userId and data fetch
+  const { userId } = useUserContext(); // Access userId from context
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedUserId = localStorage.getItem("userId");
-      setUserId(storedUserId);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!userId) return;
+    if (!userId) return; // Wait until userId is available
 
     const fetchAppliedJobs = async () => {
       try {
@@ -32,11 +27,21 @@ const JobsApplied = () => {
         }
       } catch (error) {
         console.error("Error fetching job applications:", error);
+      } finally {
+        setLoading(false); // Set loading to false after data fetch
       }
     };
 
     fetchAppliedJobs();
-  }, [userId]);
+  }, [userId]); // Fetch data whenever userId changes
+
+  if (loading || !userId) {
+    // Display loader until userId is available and data is fetched
+    return (
+      
+        <Loader/>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 min-h-screen">
